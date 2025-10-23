@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de administración</title>
+</head>
+<body>
+  <h2>Panel de administración</h2>
+  <p id="mensaje">Verificando acceso...</p>
+  <button id="btnLogout">Cerrar sesión</button>
+  
+
+  <script type="module">
+    // 🔥 Importamos Firebase y Firestore
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
+    // 🔧 Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyA8sndXPT5CN-ZzypweOPiQ3mbgmPnJUDk",
+      authDomain: "miappvendible.firebaseapp.com",
+      projectId: "miappvendible",
+      storageBucket: "miappvendible.appspot.com",
+      messagingSenderId: "149501151545",
+      appId: "1:149501151545:web:8e6430073d82409e2400e8",
+      measurementId: "G-BFFFHXC9J4"
+    };
+
+    // 🚀 Inicializamos Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // 🔐 Verificamos sesión y rol
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        console.log("No hay sesión activa. Redirigiendo...");
+        window.location.href = "index.html";
+        return;
+      }
+
+      console.log("Usuario logueado:", user.displayName);
+
+      const userRef = doc(db, "usuarios", user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (userSnap.exists()) {
+        const rol = userSnap.data().rol;
+        console.log("Rol detectado:", rol);
+
+        if (rol === "admin") {
+          document.getElementById("mensaje").innerText = `Bienvenido al panel, ${user.displayName} 👑`;
+        } else {
+          console.log("No sos admin. Redirigiendo a usuario.html...");
+          window.location.href = "usuario.html";
+        }
+      } else {
+        console.log("No se encontró el documento del usuario. Redirigiendo...");
+        window.location.href = "index.html";
+      }
+    });
+
+    // 🔓 Botón para cerrar sesión
+    document.getElementById("btnLogout").addEventListener("click", async () => {
+      await signOut(auth);
+      window.location.href = "index.html";
+    });
+
+
+    
+  </script>
+</body>
+</html>

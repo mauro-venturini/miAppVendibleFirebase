@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Carrito de compras</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://sdk.mercadopago.com/js/v2"></script>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="home.html">Mi App Vendible</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="menu">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">Login</a></li>
+          <li class="nav-item"><a class="nav-link" href="usuario.html">Mi Panel</a></li>
+          <li class="nav-item"><a class="nav-link active" href="#">🛒 Carrito</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Encabezado -->
+  <header class="bg-success text-white text-center py-4">
+    <div class="container">
+      <h1 class="display-5">Tu carrito de compras</h1>
+      <p class="lead">Revisá tus productos antes de confirmar</p>
+    </div>
+  </header>
+
+  <!-- Carrito -->
+  <section class="container my-5">
+    <div id="carritoVacio" class="text-center text-muted">Tu carrito está vacío.</div>
+    <div class="row" id="carritoProductos"></div>
+
+    <div class="text-end mt-4">
+      <h4 id="total">Total: $0</h4>
+      <button class="btn btn-primary" id="btnComprar" data-bs-toggle="modal" data-bs-target="#formularioEnvio"> Confirmar compra
+</button>
+    </div>
+  </section>
+
+  <footer class="bg-dark text-white text-center py-3">
+    <p class="mb-0">© 2025 Mi App Vendible</p>
+  </footer>
+
+  <script type="module">
+    const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+    const contenedor = document.getElementById("carritoProductos");
+    const carritoVacio = document.getElementById("carritoVacio");
+    const totalElement = document.getElementById("total");
+
+    function renderCarrito() {
+      contenedor.innerHTML = "";
+      let total = 0;
+
+      if (carrito.length === 0) {
+        carritoVacio.style.display = "block";
+        totalElement.innerText = "Total: $0";
+        return;
+      }
+
+      carritoVacio.style.display = "none";
+
+      carrito.forEach((p, index) => {
+        total += p.precio;
+        const card = document.createElement("div");
+        card.className = "col-md-4 mb-4";
+        card.innerHTML = `
+          <div class="card h-100">
+            <img src="${p.imagen}" class="card-img-top" alt="${p.nombre}">
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">${p.nombre}</h5>
+              <p class="card-text">$${p.precio.toLocaleString()}</p>
+              <button class="btn btn-danger mt-auto" onclick="eliminarProducto(${index})">Eliminar</button>
+            </div>
+          </div>
+        `;
+        contenedor.appendChild(card);
+      });
+
+      totalElement.innerText = `Total: $${total.toLocaleString()}`;
+    }
+
+    window.eliminarProducto = function (index) {
+      carrito.splice(index, 1);
+      localStorage.setItem("carrito", JSON.stringify(carrito));
+      renderCarrito();
+    };
+
+    document.getElementById("btnComprar").addEventListener("click", () => {
+      if (carrito.length === 0) {
+        alert("No hay productos en el carrito.");
+        return;
+      }
+
+      alert("¡Compra confirmada! 🎉 Gracias por tu pedido.");
+      localStorage.removeItem("carrito");
+      renderCarrito();
+    });
+
+    renderCarrito();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+
+  <!-- Modal de datos de envío -->
+<div class="modal fade" id="formularioEnvio" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Datos de envío</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formEnvio">
+          <div class="row">
+            <div class="col-md-6 mb-3"><input class="form-control" placeholder="Nombre" id="nombre" required /></div>
+            <div class="col-md-6 mb-3"><input class="form-control" placeholder="Apellido" id="apellido" required /></div>
+            <div class="col-md-6 mb-3"><input class="form-control" placeholder="Teléfono" id="telefono" required /></div>
+            <div class="col-md-6 mb-3"><input class="form-control" placeholder="Correo electrónico" id="correo" required /></div>
+            <div class="col-md-6 mb-3"><input class="form-control" placeholder="Provincia" id="provincia" required /></div>
+            <div class="col-md-6 mb-3"><input class="form-control" placeholder="Ciudad" id="ciudad" required /></div>
+            <div class="col-md-6 mb-3"><input class="form-control" placeholder="Calle" id="calle" required /></div>
+            <div class="col-md-3 mb-3"><input class="form-control" placeholder="Número" id="numero" required /></div>
+            <div class="col-md-3 mb-3"><input class="form-control" placeholder="Código Postal" id="cp" required /></div>
+            <div class="col-12 mb-3"><input class="form-control" placeholder="Información adicional (entre calles, piso, etc.)" id="info" /></div>
+            <div class="col-12 mb-3"><input class="form-control" placeholder="Nombre de quien recibe" id="recibe" required /></div>
+          </div>
+          <div class="text-end">
+            <button class="btn btn-primary" id="btnComprar" data-bs-toggle="modal" data-bs-target="#modalPago">
+              Realizar pago
+            </button>
+          </div>
+        </form>
+        <p class="text-success mt-3" id="mensajeConfirmacion"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA8sndXPT5CN-ZzypweOPiQ3mbgmPnJUDk",
+    authDomain: "miappvendible.firebaseapp.com",
+    projectId: "miappvendible",
+    storageBucket: "miappvendible.appspot.com",
+    messagingSenderId: "149501151545",
+    appId: "1:149501151545:web:8e6430073d82409e2400e8",
+    measurementId: "G-BFFFHXC9J4"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const form = document.getElementById("formEnvio");
+  const mensaje = document.getElementById("mensajeConfirmacion");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const pedido = {
+      nombre: document.getElementById("nombre").value,
+      apellido: document.getElementById("apellido").value,
+      telefono: document.getElementById("telefono").value,
+      correo: document.getElementById("correo").value,
+      provincia: document.getElementById("provincia").value,
+      ciudad: document.getElementById("ciudad").value,
+      calle: document.getElementById("calle").value,
+      numero: document.getElementById("numero").value,
+      cp: document.getElementById("cp").value,
+      info: document.getElementById("info").value,
+      recibe: document.getElementById("recibe").value,
+      carrito: JSON.parse(localStorage.getItem("carrito")) || [],
+      fecha: new Date()
+    };
+
+    try {
+      await addDoc(collection(db, "pedidos"), pedido);
+      mensaje.innerText = "✅ Pedido enviado correctamente.";
+      localStorage.removeItem("carrito");
+    } catch (error) {
+      mensaje.innerText = "❌ Error al enviar el pedido.";
+    }
+  });
+</script>
+
+<!-- Modal de pago -->
+<div class="modal fade" id="modalPago" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title">Realizar pago</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p>Serás redirigido a Mercado Pago para completar tu compra.</p>
+        <button class="btn btn-success" id="btnIrAPagar">Ir a pagar</button>
+        <p class="text-success mt-3" id="pagoExito"></p>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA8sndXPT5CN-ZzypweOPiQ3mbgmPnJUDk",
+    authDomain: "miappvendible.firebaseapp.com",
+    projectId: "miappvendible",
+    storageBucket: "miappvendible.appspot.com",
+    messagingSenderId: "149501151545",
+    appId: "1:149501151545:web:8e6430073d82409e2400e8"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const mp = new MercadoPago("TU_PUBLIC_KEY", { locale: "es-AR" });
+
+  document.getElementById("btnIrAPagar").addEventListener("click", async () => {
+    const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+
+    // Simulación: generás preferencia desde tu backend (esto debería hacerse con Cloud Functions o servidor propio)
+    const preferenceId = "ID_GENERADO_DESDE_BACKEND";
+
+    const checkout = mp.checkout({
+      preference: { id: preferenceId },
+      autoOpen: true,
+    });
+
+    // Simulación de éxito (en producción usarías webhooks o redirección)
+    setTimeout(async () => {
+      const pedido = {
+        carrito,
+        estado: "pagado",
+        fecha: new Date()
+      };
+
+      await addDoc(collection(db, "pedidos"), pedido);
+      document.getElementById("pagoExito").innerText = "✅ Pago realizado y pedido enviado.";
+      localStorage.removeItem("carrito");
+    }, 5000);
+  });
+</script>
+</body>
+</html>
