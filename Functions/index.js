@@ -30,3 +30,40 @@ setGlobalOptions({ maxInstances: 10 });
 //   logger.info("Hello logs!", {structuredData: true});
 //   response.send("Hello from Firebase!");
 // });
+
+const mercadopago = require("mercadopago");
+
+// 🔐 Configuramos Mercado Pago con tu access token
+mercadopago.configure({
+  access_token: "CODIGOMERCADOPAGOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO" // ← Reemplazá esto con tu token real
+});
+
+// 🚀 Función para crear la preferencia de pago
+exports.crearPreferencia = onRequest(async (req, res) => {
+  const carrito = req.body.carrito;
+
+  const items = carrito.map(p => ({
+    title: p.nombre,
+    quantity: 1,
+    unit_price: p.precio,
+    currency_id: "ARS"
+  }));
+
+  const preference = {
+    items,
+    back_urls: {
+      success: "https://miappvendible.web.app/views/success.html",
+      failure: "https://miappvendible.web.app/views/failure.html",
+      pending: "https://miappvendible.web.app/views/pending.html"
+    },
+    auto_return: "approved"
+  };
+
+  try {
+    const response = await mercadopago.preferences.create(preference);
+    res.json({ id: response.body.id });
+  } catch (error) {
+    logger.error("Error al crear preferencia:", error);
+    res.status(500).send("Error al crear preferencia");
+  }
+});
