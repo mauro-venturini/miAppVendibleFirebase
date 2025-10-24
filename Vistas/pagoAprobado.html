@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pago exitoso</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA8sndXPT5CN-ZzypweOPiQ3mbgmPnJUDk",
+      authDomain: "miappvendible.firebaseapp.com",
+      projectId: "miappvendible",
+      storageBucket: "miappvendible.appspot.com",
+      messagingSenderId: "149501151545",
+      appId: "1:149501151545:web:8e6430073d82409e2400e8"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const pedido = JSON.parse(localStorage.getItem("pedidoPendiente"));
+    if (pedido) {
+      pedido.estado = "pagado";
+      pedido.fecha = new Date();
+      await addDoc(collection(db, "pedidos"), pedido);
+      localStorage.removeItem("pedidoPendiente");
+    }
+  </script>
+</head>
+<body class="bg-light">
+  <div class="container text-center mt-5">
+    <h1 class="text-success">✅ Pago realizado con éxito</h1>
+    <p class="lead">Tu pedido fue enviado al administrador.</p>
+    <a href="usuario.html" class="btn btn-primary mt-3">Ir a mi panel</a>
+  </div>
+</body>
+</html>
